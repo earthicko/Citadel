@@ -108,6 +108,13 @@ KUMS Citadel Printer Manual&amp;Config Files
 *	PEI 시트는 소모품이므로 재료구매 기회가 있을 시 여분을 구매한다.
 
 
+### 3-1. 하드웨어 심화
+
+이 부분에서는 각 하드웨어 구성 요소의 자세한 정보 및 유지 보수 조언을 다룬다.
+
+> 추가 예정
+
+
 
 ## 4. 소프트웨어
 
@@ -145,6 +152,113 @@ KUMS Citadel Printer Manual&amp;Config Files
 
 
 이 부분에서는 각 구성요소별 자세한 작동 원리를 다룬다.
+
+#### 4-1-1. 라즈베리파이 4B
+
+![Raspberry Pi 4B internals](https://github.com/earthicko/Citadel/blob/main/diagrams/raspi4b.PNG)
+
+[라즈베리파이](https://www.raspberrypi.org/)는 소형 컴퓨터이다. 이 컴퓨터는 크게 2가지 역할을 한다.
+
+- OctoPrint 인스턴스 실행
+  - 웹 서버를 상시 가동
+  - 업로드된 파일을 관리하고 출력시 시리얼 포트를 통해 전송
+  - 각종 플러그인을 설치, 삭제, 버젼 관리
+- Klipper 서비스 실행
+  - 가상 시리얼 포트를 통해 수신한 G-Code를 파싱해 로우-레벨 명령으로 변환
+  - [모션 플래닝](https://en.wikipedia.org/wiki/Motion_planning) 실행
+  - 히터에 대한 PID 컨트롤
+  - 써미스터에서 비정상적인 값 수신 시 시스템 비상 정지
+
+따라서 웹 서버, 프린터 펌웨어에 문제가 생길 시 **라즈베리파이**에서 원인을 찾아야 한다.
+
+라즈베리파이 또한 컴퓨터이기 때문에 ssh를 통해 접속할 수 있다.
+
+- 사용자: pi
+- 비밀번호: 관리자에게만 공개 (비밀스럽게 인수인계)
+  - 접속 명령 예시: `ssh pi@dhlprinters.iptime.org:1033`
+
+##### 4-1-1-1. OctoPrint 유지보수
+
+Octoprint의 각종 설정은 기본적으로 웹 인터페이스를 통해 조작하고, 웹에서 해결할 수 없는 문제가 생긴 경우 ssh 접속하여 `config.yaml`을 직접 수정하여 해결한다.
+
+관리자 계정을 사용하여 웹 사이트에 접속할 시 다음과 같은 버튼이 나타난다.
+
+**버튼 스샷 추가**
+
+**항목 별 설명 추가**
+
+매뉴얼에서 이 항목들을 전부 설명하는 것은 불가능하고 불필요하다. 관리자는 능동적으로 개발자 커뮤니티에서 정보를 얻는다.
+
+- 기본 기능에 포함되지 않는 다양한 플러그인이 어떤 역할을 하는지 공부한다.
+- 필요없는 플러그인은 삭제, 필요한 플러그인을 설치한다.
+- 플러그인이 오작동하여 프린터를 손상시키지 않는지 주시한다.
+- Python Intepreter 버젼 관리를 철저히 한다.
+- 기발한 기능이 있으나 완성도가 미흡한 플러그인은 적극적으로 개발에 참여한다.
+
+주요한 기능은 다음과 같다.
+
+- **Features \- Access Control**
+
+여기서 매니저의 계정을 추가하고 제거할 수 있다. 매니저가 비밀번호를 분실했을 시 비밀번호를 찾을 방법은 없으니 계정을 삭제 후 재생성한다.
+
+모종의 이유로 **관리자 계정**이 분실된 경우, [docs](https://docs.octoprint.org/en/master/features/accesscontrol.html)를 참고하여 모든 계정을 삭제 후 초기화한다.
+
+- **OctoPrint \- Logging**
+
+여기서 시스템 로그를 열람할 수 있다.
+
+현재 디버그 레벨은 *DEBUG*로, 모든 계정의 모든 활동이 기록된다. 관리자는 이 사실을 주지시켜 매니저가 프린터를 손상시켰을 시 자발적으로 신고할 수 있는 동기를 부여해야 한다.
+
+- **OctoPrint \- Plugin Manager**
+
+여기서 플러그인을 설치/삭제할 수 있다.
+
+- **OctoPrint \- Software Update**
+
+여기서 플러그인 및 OctoPrint 인스턴스를 업데이트 할 수 있다.
+
+- **OctoPrint \- Announcement**
+
+여기서 OctoPrint 개발진의 소식을 열람할 수 있다. 보안 위협 등의 중요한 소식이 올라오므로 관리자는 해당 채널을 주시한다.
+
+- **Plugins**
+
+여기서 설치된 플러그인의 개별 설정을 관리할 수 있다.
+
+
+##### 4-1-1-2. Klipper 유지보수
+
+Klipper의 설정을 바꾸기 위해서는 `./printer.cfg` 파일을 수정한다.
+
+Klipper를 업데이트하기 위해서는 `.` 디렉토리에서 `git pull`을 실행한다.
+
+- git의 특성상 업데이트가 매끄럽지 않게 되는 상황이 잦다.
+- 업데이트는 매끄럽게 되지만 `printer.cfg`의 구성이 변경되어 사용할 수 없게 되어버릴 수 있다.
+- 자세한 사항은 [FAQ.md](https://github.com/KevinOConnor/klipper/blob/master/docs/FAQ.md#how-do-i-upgrade-to-the-latest-software)를 참조한다.
+
+
+
+#### 4-1-2. SKR v1.3
+
+![SKR v13 internals](https://github.com/earthicko/Citadel/blob/main/diagrams/skrv13.PNG)
+
+[SKR v1.3](https://github.com/bigtreetech/BIGTREETECH-SKR-V1.3)은 3D 프린터 메인보드이다.
+
+일반적인 3D 프린터에서는 메인보드가 모든 작업을 수행하기 때문에 [Marlin](https://marlinfw.org/)등의 펌웨어를 사용한다. 하지만 Klipper 펌웨어를 사용하여 대부분의 연산을 라즈베리파이에서 수행하고 SKR v1.3은 아주 단순한 역할만 맡게 되기 때문에 여기에 특화된 커스텀 펌웨어를 `build`한 뒤 `flash`한다. 이 과정은 프린터 제작 시 이미 완료했으나 추후 문제가 발생할 시 [docs](https://www.klipper3d.org/Installation.html)의 `Building and flashing the micro-controller` 문단을 참고한다.
+
+가장 로우-레벨에서 동작한 구성 요소이기 때문에 스테퍼 모터 구동 불량, 히터 결선 불량, 써미스터 리딩 불량 등의 문제가 생길 시 **SKR v1.3**에서 원인을 찾아야 한다.
+
+#### 4-1-3. 네트워크
+
+![Network internals](https://github.com/earthicko/Citadel/blob/main/diagrams/network.PNG)
+
+이 프린터는 Wi-Fi를 통해 인터넷에 접속한다. 이때 프린터에 고정된 IP가 부여되는 것이 유지/보수에 매우 편리하기 때문에 *개인용 라우터를 통해 인터넷에 접속한다.*
+
+위 그림에서 *DHL*로 표현된 라우터는 `dhlprinters.iptime.org`이라는 DDNS를 가지고 있다. 따라서 교내 네트워크 안에서는 해당 URL을 사용해 그 하위 멤버에 접근할 수 있다.
+
+결론적으로 개인 PC에서 프린터에 접속하고자 한다면 교내 네트워크 또는 그곳에 연결된 라우터(`makerspace_hall`, `makerspace_office`)에 접속한 후, 상기된 URL을 사용하면 된다.
+
+따라서 프린터가 인터넷에 접근하지 못하거나 지정된 URL이 작동하지 않을 시 **라우터**에서 원인을 찾아야 한다.
 
 
 
@@ -252,6 +366,16 @@ Octoprint는 유저를 관리자와 일반 유저로 구분하여 특정 기능�
 
 
 본인이 발급받은 ID와 패스워드를 사용해 로그인한다.
+
+ID 발급 현황
+
+ID | 성명 | 권한
+-- | --- | ---
+makerspace | 메이커스페이스 | Admins
+dhlee01 | 이\*현 | Admins
+hmna01 | 나\*민 | Operator
+ssgong01 | 공\*식 | Operator
+observer | 관찰자 | Read-only
 
 ![Octoprint Login Screen](https://github.com/earthicko/Citadel/blob/main/materials/octoprint-01.png)
 
