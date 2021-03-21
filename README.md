@@ -175,7 +175,7 @@ KUMS Citadel Printer Manual&amp;Config Files
 
 - 사용자: pi
 - 비밀번호: 관리자에게만 공개 (비밀스럽게 인수인계)
-  - 접속 명령 예시: `ssh pi@dhlprinters.iptime.org:1033`
+  - 접속 명령 예시: `ssh -p 1033 pi@kumakerspace.iptime.org`
 
 ##### 4-1-1-1. OctoPrint 유지보수
 
@@ -254,9 +254,9 @@ Klipper를 업데이트하기 위해서는 `.` 디렉토리에서 `git pull`을 
 
 이 프린터는 Wi-Fi를 통해 인터넷에 접속한다. 이때 프린터에 고정된 IP가 부여되는 것이 유지/보수에 매우 편리하기 때문에 *개인용 라우터를 통해 인터넷에 접속한다.*
 
-위 그림에서 *DHL*로 표현된 라우터는 `dhlprinters.iptime.org`이라는 DDNS를 가지고 있다. 따라서 교내 네트워크 안에서는 해당 URL을 사용해 그 하위 멤버에 접근할 수 있다.
+위 그림에서 ~~*DHL*~~로 표현된 라우터는 `kumakerspace.iptime.org`이라는 DDNS를 가지고 있다. 따라서 교내 네트워크 안에서는 해당 URL을 사용해 그 하위 멤버에 접근할 수 있다.
 
-결론적으로 개인 PC에서 프린터에 접속하고자 한다면 교내 네트워크 또는 그곳에 연결된 라우터(`makerspace_hall`, `makerspace_office`)에 접속한 후, 상기된 URL을 사용하면 된다.
+결론적으로 개인 PC에서 프린터에 접속하고자 한다면 교내 네트워크 또는 그곳에 연결된 라우터(`makerspaceHall`, `makerspaceHall5G`, `makerspace office`)에 접속한 후, 상기된 URL을 사용하면 된다.
 
 따라서 프린터가 인터넷에 접근하지 못하거나 지정된 URL이 작동하지 않을 시 **라우터**에서 원인을 찾아야 한다.
 
@@ -356,7 +356,7 @@ Octoprint는 유저를 관리자와 일반 유저로 구분하여 특정 기능�
 ### 1. 웹 서버 접속
 
 
-교내 네트워크에 접속된 PC에서 웹 브라우저를 사용해 dhlprinters.iptime.org:33 으로 접속한다.
+교내 네트워크에 접속된 PC에서 웹 브라우저를 사용해 kumakerspace.iptime.org:33 으로 접속한다.
 
   - 시설에 비치된 데스크톱 PC는 모두 교내 네트워크에 연결되어 있다.
   - *개인 랩톱을 사용할 시 KoreaUniv AP, eduroam에 연결하지 않고, makerspaceHall 또는 makerspace office에 접속한다.*
